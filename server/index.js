@@ -1,17 +1,37 @@
 const express = require("express");
-
+const path = require("path");
 const db = require("./db");
 const cors = require("cors");
-
-const path = require("path");
-
 const app = express();
 
+app.use(cors());
 const PORT = 3000;
+const clientPath = path.resolve(__dirname, "../client/dist");
 
 app.use(express.json());
-app.use(cors());
+
+app.use(function (req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Access-Control-Allow-Headers"
+  );
+  next();
+});
+
+app.get("/", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"));
+});
+
 app.get("/api/links", db.getLinks);
+app.get("/api/links/:id", db.getLinkById);
+app.post("/api/links", db.createLink);
+app.put("/api/links/:id", db.updateLink);
+app.delete("/api/links/:id", db.deleteLink);
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}.`);
